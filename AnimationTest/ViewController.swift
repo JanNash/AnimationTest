@@ -110,6 +110,7 @@ class ProgressBarContainer: UIView {
     }
     
     @objc func startAnimator() {
+        currentTime = 0
         animator?.continueAnimation(withTimingParameters: nil, durationFactor: 0)
     }
 }
