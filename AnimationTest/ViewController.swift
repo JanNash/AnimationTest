@@ -9,21 +9,34 @@ import UIKit
 
 class ViewController: UIViewController {
     private var progressBarContainer = ProgressBarContainer()
+    private lazy var startButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Start animation", for: .normal)
+        button.addTarget(progressBarContainer, action: #selector(ProgressBarContainer.startAnimator), for: .touchUpInside)
+        button.backgroundColor = UIColor.blue
+        return button
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         view.addSubview(progressBarContainer)
         progressBarContainer.translatesAutoresizingMaskIntoConstraints = false
-        progressBarContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor).isActive = true
-        progressBarContainer.centerYAnchor.constraint(equalTo: view.centerYAnchor).isActive = true
-        progressBarContainer.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8).isActive = true
-        progressBarContainer.heightAnchor.constraint(equalToConstant: 60).isActive = true
-    }
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        progressBarContainer.startAnimator()
+        NSLayoutConstraint.activate([
+            progressBarContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            progressBarContainer.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            progressBarContainer.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
+            progressBarContainer.heightAnchor.constraint(equalToConstant: 60),
+        ])
+        
+        view.addSubview(startButton)
+        startButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            startButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            startButton.topAnchor.constraint(equalTo: progressBarContainer.bottomAnchor, constant: 20),
+            startButton.widthAnchor.constraint(equalTo: progressBarContainer.widthAnchor),
+            startButton.heightAnchor.constraint(equalToConstant: 60),
+        ])
     }
 }
 
@@ -96,7 +109,7 @@ class ProgressBarContainer: UIView {
         }
     }
     
-    func startAnimator() {
+    @objc func startAnimator() {
         animator?.continueAnimation(withTimingParameters: nil, durationFactor: 0)
     }
 }
