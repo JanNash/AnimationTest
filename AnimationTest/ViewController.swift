@@ -47,6 +47,9 @@ class ProgressBarContainer: UIView {
         super.init(frame: .zero)
         backgroundColor = .green
         addSubview(progressBar)
+        
+        let ns = NotificationCenter.default
+        ns.addObserver(self, selector: #selector(applicationWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
     
     private var progressBar = ProgressBar()
@@ -79,9 +82,17 @@ class ProgressBarContainer: UIView {
     }
     
     private func createAnimator() {
+        print("creating new animator")
         // Save State
         let time = currentTime
         let isRunning = animator?.isRunning ?? false
+        
+        if let animator = self.animator,
+           animator.state != .stopped {
+            self.animator?.stopAnimation(true)
+            self.animator?.finishAnimation(at: .current)
+        }
+        self.animator = nil
         
         let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
         animator.pausesOnCompletion = true
@@ -115,6 +126,24 @@ class ProgressBarContainer: UIView {
     }
 }
 
+extension ProgressBarContainer {
+    override func didMoveToWindow() {
+        print("didMoveToWindow - window == nil: \(window == nil)")
+        super.didMoveToWindow()
+        if window == nil {
+            // disappeared
+        } else {
+            // appeared
+            createAnimator()
+        }
+    }
+    
+    @objc private func applicationWillEnterForeground() {
+        print("applicationWillEnterForeground")
+        createAnimator()
+    }
+}
+
 
 class ProgressBar: UIView {
     func setProgress(_ progress: CGFloat) {
@@ -124,6 +153,8 @@ class ProgressBar: UIView {
     
     private var progress: CGFloat = 0.4
     
+    var progressColor = UIColor.red { didSet { upcomingView.backgroundColor = progressColor } }
+    
     required init?(coder: NSCoder) { fatalError() }
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -132,7 +163,7 @@ class ProgressBar: UIView {
     
     private lazy var upcomingView: UIView = {
         let view = UIView()
-        view.backgroundColor = .red
+        view.backgroundColor = progressColor
         addSubview(view)
         return view
     }()
