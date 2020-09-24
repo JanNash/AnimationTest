@@ -89,13 +89,10 @@ class Animator {
         }
     }
     
-    func play(fromProgress progress: CGFloat? = nil) {
+    func play() {
         guard animation != nil else { return }
-        let progress = progress ?? self.progress
-        if progress != animator.fractionComplete { seekTo(progress: progress) }
+        if let animator = _animator, animator.isRunning { return }
         animator.startAnimation()
-        // This didn't work:
-//        animator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
     }
 }
 
