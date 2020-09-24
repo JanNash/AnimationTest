@@ -11,7 +11,6 @@ import UIKit
 /*
  - tabview to check what happens when view disappears and reappears
  - test view resizing while animator is running
- - observe app lifecycle notifications?
  */
 
 
@@ -49,6 +48,7 @@ class Animator {
     var animation: Animation?
     
     private(set) var progress: CGFloat = 0
+    private(set) var isRunning = false
     
     private var _animator: UIViewPropertyAnimator?
     private var animator: UIViewPropertyAnimator { _animator ?? createAnimator() }
@@ -77,6 +77,22 @@ class Animator {
         return animator
     }
     
+    init() {
+        [UIApplication.didBecomeActiveNotification, UIApplication.willResignActiveNotification].forEach({
+            NotificationCenter.default.addObserver(self, selector: #selector(receivedAppLifecycleNotification), name: $0, object: nil)
+        })
+    }
+    
+    @objc private func receivedAppLifecycleNotification(_ notification: Notification) {
+        switch notification.name {
+        case UIApplication.didBecomeActiveNotification:
+            if isRunning { _animator?.startAnimation() }
+        case UIApplication.willResignActiveNotification:
+            _animator?.pauseAnimation()
+        default: return
+        }
+    }
+    
     func updateForFrameChange() {
         guard let oldAnimator = _animator, UIApplication.shared.applicationState == .active else { return }
         _animator?.stopAnimation(true)
@@ -90,14 +106,16 @@ class Animator {
     }
     
     func stop(_ type: StopType) {
-        pause()
+        _animator?.pauseAnimation()
         _animator?.fractionComplete = 0
         progress = 0
+        isRunning = false
     }
     
     func pause() {
         _animator?.pauseAnimation()
         progress = _animator?.fractionComplete ?? 0
+        isRunning = false
     }
     
     func seekTo(progress: CGFloat) {
@@ -113,6 +131,7 @@ class Animator {
         guard animation != nil else { return }
         if let animator = _animator, animator.isRunning { return }
         animator.startAnimation()
+        isRunning = true
     }
 }
 
