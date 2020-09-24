@@ -76,11 +76,15 @@ class Animator {
             _animator?.startAnimation()
         case UIApplication.willResignActiveNotification:
             guard isRunning else { return }
-            _animator?.pauseAnimation()
-            progress = _animator?.fractionComplete ?? 0
+            pauseAnimator()
             backgroundTransitionTime = CACurrentMediaTime()
         default: return
         }
+    }
+    
+    private func pauseAnimator() {
+        _animator?.pauseAnimation()
+        progress = _animator?.fractionComplete ?? 0
     }
     
     func updateForLayoutChange() {
@@ -103,8 +107,7 @@ class Animator {
     }
     
     func pause() {
-        _animator?.pauseAnimation()
-        progress = _animator?.fractionComplete ?? 0
+        pauseAnimator()
         isRunning = false
     }
     
