@@ -52,28 +52,31 @@ class Animator {
     private(set) var progress: CGFloat = 0
     
     private var _animator: UIViewPropertyAnimator?
-    private var animator: UIViewPropertyAnimator {
-        _animator ?? {
+    private var animator: UIViewPropertyAnimator { _animator ?? createAnimator() }
+    private func createAnimator() -> UIViewPropertyAnimator {
+        let animator: UIViewPropertyAnimator = {
             switch configuration {
             case .timingParameters(let parameters):
-                _animator = .init(duration: duration, timingParameters: parameters)
+                return .init(duration: duration, timingParameters: parameters)
             case .curve(let curve):
-                _animator = .init(duration: duration, curve: curve)
+                return .init(duration: duration, curve: curve)
             case .controlPoints(let controlPoint1, let controlPoint2):
-                _animator = .init(duration: duration, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
+                return .init(duration: duration, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
             case .dampingRatio(let dampingRatio):
-                _animator = .init(duration: duration, dampingRatio: dampingRatio)
+                return .init(duration: duration, dampingRatio: dampingRatio)
             }
-            
-            _animator?.pausesOnCompletion = true
-            _animator?.pauseAnimation()
-            if let animation = animation {
-                _animator?.addAnimations(animation.execute)
-            }
-            _animator?.fractionComplete = progress
-            
-            return _animator!
         }()
+        
+        animator.pausesOnCompletion = true
+        animator.pauseAnimation()
+        if let animation = animation {
+            animator.addAnimations(animation.execute)
+        }
+        animator.fractionComplete = progress
+        
+        _animator = animator
+        return animator
+    }
     }
     
     func stop(_ type: StopType) {
