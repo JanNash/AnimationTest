@@ -7,6 +7,14 @@
 
 import UIKit
 
+// TODO:
+/*
+ - tabview to check what happens when view disappears and reappears
+ - test view resizing while animator is running
+ - observe app lifecycle notifications?
+ - fix setting progress before animator is started
+ */
+
 
 class Animation {
     let id = UUID()
