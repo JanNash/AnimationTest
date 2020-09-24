@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5E0C6753251CC807006FA6BC /* CustomStringConvertible extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0C6752251CC807006FA6BC /* CustomStringConvertible extensions.swift */; };
 		5E8535842513B96800E6244D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8535832513B96800E6244D /* AppDelegate.swift */; };
 		5E8535862513B96800E6244D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8535852513B96800E6244D /* SceneDelegate.swift */; };
 		5E8535882513B96800E6244D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8535872513B96800E6244D /* ViewController.swift */; };
@@ -15,6 +16,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5E0C6752251CC807006FA6BC /* CustomStringConvertible extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible extensions.swift"; sourceTree = "<group>"; };
 		5E8535802513B96800E6244D /* AnimationTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AnimationTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E8535832513B96800E6244D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5E8535852513B96800E6244D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -60,6 +62,7 @@
 				5E85358C2513B96A00E6244D /* Assets.xcassets */,
 				5E85358E2513B96A00E6244D /* LaunchScreen.storyboard */,
 				5E8535912513B96A00E6244D /* Info.plist */,
+				5E0C6752251CC807006FA6BC /* CustomStringConvertible extensions.swift */,
 			);
 			path = AnimationTest;
 			sourceTree = "<group>";
@@ -135,6 +138,7 @@
 			files = (
 				5E8535882513B96800E6244D /* ViewController.swift in Sources */,
 				5E8535842513B96800E6244D /* AppDelegate.swift in Sources */,
+				5E0C6753251CC807006FA6BC /* CustomStringConvertible extensions.swift in Sources */,
 				5E8535862513B96800E6244D /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
