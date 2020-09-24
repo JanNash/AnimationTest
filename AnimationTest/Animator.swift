@@ -12,7 +12,6 @@ import UIKit
 /*
  - tabview to check what happens when view disappears and reappears
  - test view layout changes while animator is running
- - save current time when going to background and advance progress accordingly when coming back to foreground
  */
 
 
@@ -20,14 +19,14 @@ struct Keyframes {
     let id = UUID()
     private let keyframes: () -> Void
     
-    init<T: UIView>(for view: T, keyframes: @escaping (T) -> Void) {
+    init<T: UIView>(for view: T, _ frames: [(relStart: Double, relDuration: Double, animation: (T) -> Void)]) {
         self.keyframes = { [weak view] in
             guard let view = view else { return }
-            keyframes(view)
+            frames.map({ frame in (frame.0, frame.1, { frame.2(view) }) }).forEach(UIView.addKeyframe)
         }
     }
     
-    func execute() { keyframes() }
+    func evaluate() { keyframes() }
 }
 
 
@@ -40,20 +39,22 @@ class Animator {
     private(set) var backgroundTransitionTime: CFTimeInterval?
     
     private var _animator: UIViewPropertyAnimator?
-    private var animator: UIViewPropertyAnimator { _animator ?? createAnimator() }
-    private func createAnimator() -> UIViewPropertyAnimator {
-        let duration = self.duration
-        _animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
-        _animator?.pausesOnCompletion = true
-        _animator?.fractionComplete = progress
-        
-        if let keyframes = keyframes {
-            _animator?.addAnimations({
-                UIView.animateKeyframes(withDuration: duration, delay: 0, animations: keyframes.execute)
-            })
-        }
-        
-        return _animator!
+    private var animator: UIViewPropertyAnimator {
+        _animator ?? {
+            let duration = self.duration
+            let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
+            animator.pausesOnCompletion = true
+            animator.fractionComplete = progress
+            
+            if let keyframes = keyframes {
+                animator.addAnimations({
+                    UIView.animateKeyframes(withDuration: duration, delay: 0) { keyframes.evaluate() }
+                })
+            }
+            
+            _animator = animator
+            return animator
+        }()
     }
     
     init(duration: Double) {
@@ -61,29 +62,6 @@ class Animator {
         [UIApplication.willEnterForegroundNotification, UIApplication.willResignActiveNotification].forEach({
             NotificationCenter.default.addObserver(self, selector: #selector(receivedAppLifecycleNotification), name: $0, object: nil)
         })
-    }
-    
-    @objc private func receivedAppLifecycleNotification(_ notification: Notification) {
-        switch notification.name {
-        case UIApplication.willEnterForegroundNotification:
-            guard isRunning else { return }
-            if let backgroundTransitionTime = backgroundTransitionTime {
-                self.backgroundTransitionTime = nil
-                let backgroundProgress = (CACurrentMediaTime() - backgroundTransitionTime) / duration
-                seekTo(progress: progress + CGFloat(backgroundProgress))
-            }
-            _animator?.startAnimation()
-        case UIApplication.willResignActiveNotification:
-            guard isRunning else { return }
-            pauseAnimator()
-            backgroundTransitionTime = CACurrentMediaTime()
-        default: return
-        }
-    }
-    
-    private func pauseAnimator() {
-        _animator?.pauseAnimation()
-        progress = _animator?.fractionComplete ?? 0
     }
     
     func updateForLayoutChange() {
@@ -128,5 +106,31 @@ class Animator {
         }
         animator.startAnimation()
         isRunning = true
+    }
+}
+
+
+private extension Animator {
+    @objc func receivedAppLifecycleNotification(_ notification: Notification) {
+        switch notification.name {
+        case UIApplication.willEnterForegroundNotification:
+            guard isRunning else { return }
+            if let backgroundTransitionTime = backgroundTransitionTime {
+                self.backgroundTransitionTime = nil
+                let backgroundProgress = (CACurrentMediaTime() - backgroundTransitionTime) / duration
+                seekTo(progress: progress + CGFloat(backgroundProgress))
+            }
+            _animator?.startAnimation()
+        case UIApplication.willResignActiveNotification:
+            guard isRunning else { return }
+            pauseAnimator()
+            backgroundTransitionTime = CACurrentMediaTime()
+        default: return
+        }
+    }
+    
+    func pauseAnimator() {
+        _animator?.pauseAnimation()
+        progress = _animator?.fractionComplete ?? 0
     }
 }

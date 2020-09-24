@@ -98,15 +98,10 @@ class ProgressBarContainer: UIView {
     func createAnimator() -> Animator {
         let animator = Animator(duration: 10)
         animator.seekTo(progress: 0.5)
-        animator.keyframes = Keyframes(for: self) { view in
-            UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 0) {
-                view.progressBar.setProgress(0)
-            }
-            
-            UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 1) {
-                view.progressBar.setProgress(1)
-            }
-        }
+        animator.keyframes = Keyframes(for: self, [
+            (relStart: 0, relDuration: 0, { $0.progressBar.setProgress(0) }),
+            (relStart: 0, relDuration: 1, { $0.progressBar.setProgress(1) })
+        ])
         return animator
     }
     
