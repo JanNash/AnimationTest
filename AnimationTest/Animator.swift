@@ -43,18 +43,17 @@ class Animator {
     private var animator: UIViewPropertyAnimator { _animator ?? createAnimator() }
     private func createAnimator() -> UIViewPropertyAnimator {
         let duration = self.duration
-        let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
+        _animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
+        _animator?.pausesOnCompletion = true
+        _animator?.fractionComplete = progress
         
-        animator.pausesOnCompletion = true
         if let keyframes = keyframes {
-            animator.addAnimations({
+            _animator?.addAnimations({
                 UIView.animateKeyframes(withDuration: duration, delay: 0, animations: keyframes.execute)
             })
         }
-        animator.fractionComplete = progress
         
-        _animator = animator
-        return animator
+        return _animator!
     }
     
     init(duration: Double) {
@@ -88,11 +87,11 @@ class Animator {
     }
     
     func updateForLayoutChange() {
-        guard let oldAnimator = _animator, UIApplication.shared.applicationState == .active else { return }
-        _animator?.stopAnimation(true)
-        _animator?.finishAnimation(at: .current)
+        guard let currentAnimator = _animator, UIApplication.shared.applicationState == .active else { return }
+        let isRunning = currentAnimator.isRunning
+        currentAnimator.stopAnimation(true)
+        currentAnimator.finishAnimation(at: .current)
         _animator = nil
-        let isRunning = oldAnimator.isRunning
         animator.fractionComplete = progress
         if isRunning {
             animator.startAnimation()
@@ -124,7 +123,9 @@ class Animator {
     func play() {
         guard keyframes != nil else { return }
         if let existingAnimator = _animator, existingAnimator.isRunning { return }
-        if animator.fractionComplete == 1 { seekTo(progress: 0) }
+        if animator.fractionComplete == 1 {
+            seekTo(progress: 0)
+        }
         animator.startAnimation()
         isRunning = true
     }
