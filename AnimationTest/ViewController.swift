@@ -175,9 +175,6 @@ class ProgressBarContainer: UIView {
         super.init(frame: .zero)
         backgroundColor = .green
         addSubview(progressBar)
-        
-        let ns = NotificationCenter.default
-        ns.addObserver(self, selector: #selector(applicationWillEnterForeground), name: UIApplication.willEnterForegroundNotification, object: nil)
     }
     
     private var progressBar = ProgressBar()
@@ -214,26 +211,6 @@ class ProgressBarContainer: UIView {
     
     @objc func stopAnimator() {
         animator.stop(.withoutFinishing)
-    }
-}
-
-extension ProgressBarContainer {
-    override func didMoveToWindow() {
-        print("didMoveToWindow - window == nil: \(window == nil)")
-        super.didMoveToWindow()
-        if window == nil {
-            // disappeared
-//            animator.pause()
-        } else {
-            // appeared
-//            animator.play()
-//            createAnimator()
-        }
-    }
-    
-    @objc private func applicationWillEnterForeground() {
-        print("applicationWillEnterForeground")
-//        createAnimator()
     }
 }
 
