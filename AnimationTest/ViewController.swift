@@ -156,12 +156,12 @@ class ProgressBarContainer: UIView {
     
     private lazy var animator: Animator = {
         let animator = Animator()
-        animator.duration = 30
+        animator.duration = 10
         animator.configuration = .curve(.linear)
         animator.seekTo(progress: 0.5)
         animator.animation = Animation(for: self) { view in
             view.progressBar.setProgress(0)
-            UIView.animateKeyframes(withDuration: 30, delay: 0, animations: {
+            UIView.animateKeyframes(withDuration: 10, delay: 0, animations: {
                 UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 1) {
                     view.progressBar.setProgress(1)
                 }
