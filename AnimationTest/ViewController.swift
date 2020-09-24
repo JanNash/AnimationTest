@@ -12,7 +12,6 @@ import UIKit
  - tabview to check what happens when view disappears and reappears
  - test view resizing while animator is running
  - observe app lifecycle notifications?
- - fix setting progress before animator is started
  */
 
 
@@ -210,6 +209,7 @@ class ProgressBarContainer: UIView {
         let animator = Animator()
         animator.duration = 10
         animator.configuration = .curve(.linear)
+        animator.seekTo(progress: 0.5)
         animator.animation = Animation(for: self) { view in
             view.progressBar.setProgress(0)
             UIView.animateKeyframes(withDuration: 10, delay: 0, animations: {
@@ -218,7 +218,6 @@ class ProgressBarContainer: UIView {
                 }
             })
         }
-        animator.seekTo(progress: 0.5)
         return animator
     }
     
