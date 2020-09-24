@@ -11,11 +11,13 @@ import UIKit
 // TODO:
 /*
  - tabview to check what happens when view disappears and reappears
- - test view resizing while animator is running
+ - test view layout changes while animator is running
+ - save current time when going to background and advance progress accordingly when coming back to foreground
+ - rename updateForFrameChange
  */
 
 
-class Animation {
+class Keyframes {
     let id = UUID()
     private let animation: () -> Void
     
@@ -31,17 +33,8 @@ class Animation {
 
 
 class Animator {
-    enum Configuration {
-        case timingParameters(UITimingCurveProvider)
-        case curve(UIView.AnimationCurve)
-        case controlPoints(p1: CGPoint, p2: CGPoint)
-        case dampingRatio(CGFloat)
-    }
-    
-    // Setting these while the animation is running is not implemented yet
-    var duration: Double = 10
-    var configuration: Configuration = .curve(.linear)
-    var animation: Animation?
+    let duration: Double
+    var keyframes: Keyframes?
     
     private(set) var progress: CGFloat = 0
     private(set) var isRunning = false
@@ -49,23 +42,15 @@ class Animator {
     private var _animator: UIViewPropertyAnimator?
     private var animator: UIViewPropertyAnimator { _animator ?? createAnimator() }
     private func createAnimator() -> UIViewPropertyAnimator {
-        let animator: UIViewPropertyAnimator = {
-            switch configuration {
-            case .timingParameters(let parameters):
-                return .init(duration: duration, timingParameters: parameters)
-            case .curve(let curve):
-                return .init(duration: duration, curve: curve)
-            case .controlPoints(let controlPoint1, let controlPoint2):
-                return .init(duration: duration, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
-            case .dampingRatio(let dampingRatio):
-                return .init(duration: duration, dampingRatio: dampingRatio)
-            }
-        }()
+        let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
         
         animator.pausesOnCompletion = true
         animator.pauseAnimation()
-        if let animation = animation {
-            animator.addAnimations(animation.execute)
+        if let animation = keyframes {
+            animator.addAnimations({ [weak self] in
+                guard let self = self else { return }
+                UIView.animateKeyframes(withDuration: self.duration, delay: 0, animations: animation.execute)
+            })
         }
         animator.fractionComplete = progress
         
@@ -73,7 +58,8 @@ class Animator {
         return animator
     }
     
-    init() {
+    init(duration: Double) {
+        self.duration = duration
         [UIApplication.didBecomeActiveNotification, UIApplication.willResignActiveNotification].forEach({
             NotificationCenter.default.addObserver(self, selector: #selector(receivedAppLifecycleNotification), name: $0, object: nil)
         })
@@ -82,6 +68,7 @@ class Animator {
     @objc private func receivedAppLifecycleNotification(_ notification: Notification) {
         switch notification.name {
         case UIApplication.didBecomeActiveNotification:
+            // FIXME: Advance progress according to passed time since going to background
             if isRunning { _animator?.startAnimation() }
         case UIApplication.willResignActiveNotification:
             _animator?.pauseAnimation()
@@ -103,10 +90,8 @@ class Animator {
     
     func stop() {
         _animator?.pauseAnimation()
-        
         _animator?.fractionComplete = 0
         progress = 0
-        
         isRunning = false
     }
     
@@ -126,8 +111,8 @@ class Animator {
     }
     
     func play() {
-        guard animation != nil else { return }
-        if let animator = _animator, animator.isRunning { return }
+        guard keyframes != nil else { return }
+        if let existingAnimator = _animator, existingAnimator.isRunning { return }
         animator.startAnimation()
         isRunning = true
     }

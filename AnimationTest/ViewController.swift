@@ -96,32 +96,23 @@ class ProgressBarContainer: UIView {
     
     private var animator: Animator?
     func createAnimator() -> Animator {
-        let animator = Animator()
-        animator.duration = 10
-        animator.configuration = .curve(.linear)
+        let animator = Animator(duration: 10)
         animator.seekTo(progress: 0.5)
-        animator.animation = Animation(for: self) { view in
-            view.progressBar.setProgress(0)
-            UIView.animateKeyframes(withDuration: 10, delay: 0, animations: {
-                UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 1) {
-                    view.progressBar.setProgress(1)
-                }
-            })
+        animator.keyframes = Keyframes(for: self) { view in
+            UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 0) {
+                view.progressBar.setProgress(0)
+            }
+            
+            UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 1) {
+                view.progressBar.setProgress(1)
+            }
         }
         return animator
     }
     
-    @objc func startAnimator() {
-        animator?.play()
-    }
-    
-    @objc func pauseAnimator() {
-        animator?.pause()
-    }
-    
-    @objc func stopAnimator() {
-        animator?.stop()
-    }
+    @objc func startAnimator() { animator?.play() }
+    @objc func pauseAnimator() { animator?.pause() }
+    @objc func stopAnimator() { animator?.stop() }
 }
 
 
