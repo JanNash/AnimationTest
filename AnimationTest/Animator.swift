@@ -121,6 +121,7 @@ class Animator {
     func play() {
         guard keyframes != nil else { return }
         if let existingAnimator = _animator, existingAnimator.isRunning { return }
+        if animator.fractionComplete == 1 { seekTo(progress: 0) }
         animator.startAnimation()
         isRunning = true
     }
