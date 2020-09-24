@@ -77,6 +77,17 @@ class Animator {
         _animator = animator
         return animator
     }
+    
+    func updateForFrameChange() {
+        guard let oldAnimator = _animator, UIApplication.shared.applicationState == .active else { return }
+        _animator?.stopAnimation(true)
+        _animator?.finishAnimation(at: .current)
+        _animator = nil
+        let isRunning = oldAnimator.isRunning
+        animator.fractionComplete = progress
+        if isRunning {
+            animator.startAnimation()
+        }
     }
     
     func stop(_ type: StopType) {
@@ -191,7 +202,7 @@ class ProgressBarContainer: UIView {
         super.layoutSubviews()
         progressBar.frame = bounds.inset(by: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5))
         progressBar.layoutIfNeeded()
-//        animator?.seekTo(progress: 0.5)
+        animator?.updateForFrameChange()
     }
     
     private var animator: Animator?
@@ -207,7 +218,7 @@ class ProgressBarContainer: UIView {
                 }
             })
         }
-//        animator.seekTo(progress: 0.5)
+        animator.seekTo(progress: 0.5)
         return animator
     }
     
