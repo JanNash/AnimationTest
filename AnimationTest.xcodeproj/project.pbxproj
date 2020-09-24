@@ -10,6 +10,7 @@
 		5E0C6753251CC807006FA6BC /* CustomStringConvertible extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0C6752251CC807006FA6BC /* CustomStringConvertible extensions.swift */; };
 		5E0C6756251CC831006FA6BC /* Animator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0C6755251CC831006FA6BC /* Animator.swift */; };
 		5E0C6759251CFE15006FA6BC /* clamp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0C6758251CFE15006FA6BC /* clamp.swift */; };
+		5E0C6773251D0DF5006FA6BC /* Keyframes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E0C6772251D0DF5006FA6BC /* Keyframes.swift */; };
 		5E8535842513B96800E6244D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8535832513B96800E6244D /* AppDelegate.swift */; };
 		5E8535862513B96800E6244D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8535852513B96800E6244D /* SceneDelegate.swift */; };
 		5E8535882513B96800E6244D /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5E8535872513B96800E6244D /* ViewController.swift */; };
@@ -21,6 +22,7 @@
 		5E0C6752251CC807006FA6BC /* CustomStringConvertible extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CustomStringConvertible extensions.swift"; sourceTree = "<group>"; };
 		5E0C6755251CC831006FA6BC /* Animator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animator.swift; sourceTree = "<group>"; };
 		5E0C6758251CFE15006FA6BC /* clamp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = clamp.swift; sourceTree = "<group>"; };
+		5E0C6772251D0DF5006FA6BC /* Keyframes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Keyframes.swift; sourceTree = "<group>"; };
 		5E8535802513B96800E6244D /* AnimationTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AnimationTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E8535832513B96800E6244D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		5E8535852513B96800E6244D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -69,6 +71,7 @@
 				5E0C6752251CC807006FA6BC /* CustomStringConvertible extensions.swift */,
 				5E0C6755251CC831006FA6BC /* Animator.swift */,
 				5E0C6758251CFE15006FA6BC /* clamp.swift */,
+				5E0C6772251D0DF5006FA6BC /* Keyframes.swift */,
 			);
 			path = AnimationTest;
 			sourceTree = "<group>";
@@ -144,6 +147,7 @@
 			files = (
 				5E0C6756251CC831006FA6BC /* Animator.swift in Sources */,
 				5E0C6759251CFE15006FA6BC /* clamp.swift in Sources */,
+				5E0C6773251D0DF5006FA6BC /* Keyframes.swift in Sources */,
 				5E8535882513B96800E6244D /* ViewController.swift in Sources */,
 				5E8535842513B96800E6244D /* AppDelegate.swift in Sources */,
 				5E0C6753251CC807006FA6BC /* CustomStringConvertible extensions.swift in Sources */,
