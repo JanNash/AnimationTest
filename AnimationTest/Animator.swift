@@ -109,6 +109,7 @@ class Animator {
     }
     
     func seekTo(progress: CGFloat) {
+        let progress = progress.clamped(to: 0...1)
         self.progress = progress
         let isRunning = animator.isRunning
         animator.fractionComplete = progress
@@ -122,5 +123,18 @@ class Animator {
         if let existingAnimator = _animator, existingAnimator.isRunning { return }
         animator.startAnimation()
         isRunning = true
+    }
+}
+
+
+
+func clamp<T>(_ value: T, to range: ClosedRange<T>) -> T {
+    max(range.lowerBound, min(value, range.upperBound))
+}
+
+
+extension Comparable {
+    func clamped(to range: ClosedRange<Self>) -> Self {
+        clamp(self, to: range)
     }
 }
