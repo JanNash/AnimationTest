@@ -37,11 +37,6 @@ class Animator {
         case dampingRatio(CGFloat)
     }
     
-    enum StopType {
-        case withoutFinishing
-        case finish(position: UIViewAnimatingPosition)
-    }
-    
     // Setting these while the animation is running is not implemented yet
     var duration: Double = 10
     var configuration: Configuration = .curve(.linear)
@@ -105,10 +100,12 @@ class Animator {
         }
     }
     
-    func stop(_ type: StopType) {
+    func stop() {
         _animator?.pauseAnimation()
+        
         _animator?.fractionComplete = 0
         progress = 0
+        
         isRunning = false
     }
     
@@ -249,7 +246,7 @@ class ProgressBarContainer: UIView {
     }
     
     @objc func stopAnimator() {
-        animator?.stop(.withoutFinishing)
+        animator?.stop()
     }
 }
 
