@@ -31,6 +31,12 @@ class Animator {
         case dampingRatio(CGFloat)
     }
     
+    enum StopType {
+        case withoutFinishing
+        case finish(position: UIViewAnimatingPosition)
+    }
+    
+    // Setting these while the animation is running is not implemented yet
     var duration: Double = 10
     var configuration: Configuration = .curve(.linear)
     var animation: Animation?
@@ -61,22 +67,16 @@ class Animator {
             return _animator!
         }()
     }
-
-    enum StopType {
-        case withoutFinishing
-        case finish(position: UIViewAnimatingPosition)
-    }
     
     func stop(_ type: StopType) {
-        _animator?.stopAnimation(true)
-        if case .finish(let position) = type {
-            _animator?.finishAnimation(at: position)
-        }
+        pause()
+        _animator?.fractionComplete = 0
         progress = 0
     }
     
     func pause() {
         _animator?.pauseAnimation()
+        progress = _animator?.fractionComplete ?? 0
     }
     
     func seekTo(progress: CGFloat) {
@@ -111,6 +111,22 @@ class ViewController: UIViewController {
         return button
     }()
     
+    private lazy var pauseButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Pause animation", for: .normal)
+        button.addTarget(progressBarContainer, action: #selector(ProgressBarContainer.pauseAnimator), for: .touchUpInside)
+        button.backgroundColor = UIColor.blue
+        return button
+    }()
+    
+    private lazy var stopButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Stop animation", for: .normal)
+        button.addTarget(progressBarContainer, action: #selector(ProgressBarContainer.stopAnimator), for: .touchUpInside)
+        button.backgroundColor = UIColor.blue
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -118,7 +134,7 @@ class ViewController: UIViewController {
         progressBarContainer.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             progressBarContainer.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            progressBarContainer.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            progressBarContainer.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: -150),
             progressBarContainer.widthAnchor.constraint(equalTo: view.widthAnchor, multiplier: 0.8),
             progressBarContainer.heightAnchor.constraint(equalToConstant: 60),
         ])
@@ -130,6 +146,24 @@ class ViewController: UIViewController {
             startButton.topAnchor.constraint(equalTo: progressBarContainer.bottomAnchor, constant: 20),
             startButton.widthAnchor.constraint(equalTo: progressBarContainer.widthAnchor),
             startButton.heightAnchor.constraint(equalToConstant: 60),
+        ])
+        
+        view.addSubview(pauseButton)
+        pauseButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            pauseButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            pauseButton.topAnchor.constraint(equalTo: startButton.bottomAnchor, constant: 20),
+            pauseButton.widthAnchor.constraint(equalTo: progressBarContainer.widthAnchor),
+            pauseButton.heightAnchor.constraint(equalToConstant: 60),
+        ])
+        
+        view.addSubview(stopButton)
+        stopButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            stopButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            stopButton.topAnchor.constraint(equalTo: pauseButton.bottomAnchor, constant: 20),
+            stopButton.widthAnchor.constraint(equalTo: progressBarContainer.widthAnchor),
+            stopButton.heightAnchor.constraint(equalToConstant: 60),
         ])
     }
 }
@@ -172,6 +206,14 @@ class ProgressBarContainer: UIView {
     
     @objc func startAnimator() {
         animator.play()
+    }
+    
+    @objc func pauseAnimator() {
+        animator.pause()
+    }
+    
+    @objc func stopAnimator() {
+        animator.stop(.withoutFinishing)
     }
 }
 
