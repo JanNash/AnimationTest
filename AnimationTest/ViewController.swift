@@ -89,7 +89,6 @@ class Animator {
     
     func seekTo(progress: CGFloat) {
         self.progress = progress
-        guard let animator = _animator else { return }
         let isRunning = animator.isRunning
         animator.fractionComplete = progress
         if !isRunning {
@@ -180,6 +179,7 @@ class ProgressBarContainer: UIView {
         super.init(frame: .zero)
         backgroundColor = .green
         addSubview(progressBar)
+        animator = createAnimator()
     }
     
     private var progressBar = ProgressBar()
@@ -188,13 +188,14 @@ class ProgressBarContainer: UIView {
         super.layoutSubviews()
         progressBar.frame = bounds.inset(by: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5))
         progressBar.layoutIfNeeded()
+//        animator?.seekTo(progress: 0.5)
     }
     
-    private lazy var animator: Animator = {
+    private var animator: Animator?
+    func createAnimator() -> Animator {
         let animator = Animator()
         animator.duration = 10
         animator.configuration = .curve(.linear)
-        animator.seekTo(progress: 0.5)
         animator.animation = Animation(for: self) { view in
             view.progressBar.setProgress(0)
             UIView.animateKeyframes(withDuration: 10, delay: 0, animations: {
@@ -203,19 +204,20 @@ class ProgressBarContainer: UIView {
                 }
             })
         }
+//        animator.seekTo(progress: 0.5)
         return animator
-    }()
+    }
     
     @objc func startAnimator() {
-        animator.play()
+        animator?.play()
     }
     
     @objc func pauseAnimator() {
-        animator.pause()
+        animator?.pause()
     }
     
     @objc func stopAnimator() {
-        animator.stop(.withoutFinishing)
+        animator?.stop(.withoutFinishing)
     }
 }
 
