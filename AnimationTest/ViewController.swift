@@ -242,3 +242,16 @@ class ProgressBar: UIView {
     }
 }
 
+
+extension UIViewAnimatingState: CustomStringConvertible {
+    public var description: String {
+        return "UIViewAnimatingState." + {
+            switch self {
+            case .active: return "active"
+            case .inactive: return "inactive"
+            case .stopped: return "stopped"
+            @unknown default: return "@unknown.default(rawValue: \(rawValue))"
+            }
+        }()
+    }
+}
