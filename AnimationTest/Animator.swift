@@ -17,25 +17,25 @@ import UIKit
  */
 
 
-class Keyframes {
+struct Keyframes {
     let id = UUID()
-    private let animation: () -> Void
+    private let keyframes: () -> Void
     
-    init<T: UIView>(for view: T, animation: @escaping (T) -> Void) {
-        self.animation = { [weak view] in
+    init<T: UIView>(for view: T, keyframes: @escaping (T) -> Void) {
+        self.keyframes = { [weak view] in
             guard let view = view else { return }
-            animation(view)
+            keyframes(view)
         }
     }
     
-    func execute() { animation() }
+    func execute() { keyframes() }
 }
 
 
 class Animator {
-    let duration: Double
     var keyframes: Keyframes?
     
+    private let duration: Double
     private(set) var progress: CGFloat = 0
     private(set) var isRunning = false
     
