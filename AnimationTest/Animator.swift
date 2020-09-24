@@ -15,11 +15,13 @@ import UIKit
  */
 
 
-struct Keyframes {
+struct Keyframes<T: UIView> {
     let id = UUID()
+    private weak var view: T?
     private let keyframes: () -> Void
     
-    init<T: UIView>(for view: T, _ frames: [(relStart: Double, relDuration: Double, animation: (T) -> Void)]) {
+    init(for view: T, _ frames: [(relStart: Double, relDuration: Double, animation: (T) -> Void)]) {
+        self.view = view
         self.keyframes = { [weak view] in
             guard let view = view else { return }
             frames.map({ frame in (frame.0, frame.1, { frame.2(view) }) }).forEach(UIView.addKeyframe)
@@ -27,11 +29,12 @@ struct Keyframes {
     }
     
     func evaluate() { keyframes() }
+    func layoutViewIfNeeded() { view?.layoutIfNeeded() }
 }
 
 
-class Animator {
-    var keyframes: Keyframes?
+class Animator<T: UIView> {
+    var keyframes: Keyframes<T>?
     
     private let duration: Double
     private(set) var progress: CGFloat = 0
@@ -70,6 +73,7 @@ class Animator {
         currentAnimator.stopAnimation(true)
         currentAnimator.finishAnimation(at: .current)
         _animator = nil
+        keyframes?.layoutViewIfNeeded()
         animator.fractionComplete = progress
         if isRunning {
             animator.startAnimation()
@@ -107,11 +111,8 @@ class Animator {
         animator.startAnimation()
         isRunning = true
     }
-}
-
-
-private extension Animator {
-    @objc func receivedAppLifecycleNotification(_ notification: Notification) {
+    
+    @objc private func receivedAppLifecycleNotification(_ notification: Notification) {
         switch notification.name {
         case UIApplication.willEnterForegroundNotification:
             guard isRunning else { return }
@@ -129,7 +130,7 @@ private extension Animator {
         }
     }
     
-    func pauseAnimator() {
+    private func pauseAnimator() {
         _animator?.pauseAnimation()
         progress = _animator?.fractionComplete ?? 0
     }

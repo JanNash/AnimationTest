@@ -90,17 +90,16 @@ class ProgressBarContainer: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         progressBar.frame = bounds.inset(by: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5))
-        progressBar.layoutIfNeeded()
         animator?.updateForLayoutChange()
     }
     
-    private var animator: Animator?
-    func createAnimator() -> Animator {
-        let animator = Animator(duration: 10)
+    private var animator: Animator<ProgressBar>?
+    func createAnimator() -> Animator<ProgressBar> {
+        let animator = Animator<ProgressBar>(duration: 10)
         animator.seekTo(progress: 0.5)
-        animator.keyframes = Keyframes(for: self, [
-            (relStart: 0, relDuration: 0, { $0.progressBar.setProgress(0) }),
-            (relStart: 0, relDuration: 1, { $0.progressBar.setProgress(1) })
+        animator.keyframes = Keyframes(for: progressBar, [
+            (relStart: 0, relDuration: 0, { $0.setProgress(0) }),
+            (relStart: 0, relDuration: 1, { $0.setProgress(1) })
         ])
         return animator
     }
