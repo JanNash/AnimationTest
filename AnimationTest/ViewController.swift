@@ -91,7 +91,7 @@ class ProgressBarContainer: UIView {
         super.layoutSubviews()
         progressBar.frame = bounds.inset(by: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5))
         progressBar.layoutIfNeeded()
-        animator?.updateForFrameChange()
+        animator?.updateForLayoutChange()
     }
     
     private var animator: Animator?

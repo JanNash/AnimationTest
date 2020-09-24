@@ -13,7 +13,6 @@ import UIKit
  - tabview to check what happens when view disappears and reappears
  - test view layout changes while animator is running
  - save current time when going to background and advance progress accordingly when coming back to foreground
- - rename updateForFrameChange
  */
 
 
@@ -76,7 +75,7 @@ class Animator {
         }
     }
     
-    func updateForFrameChange() {
+    func updateForLayoutChange() {
         guard let oldAnimator = _animator, UIApplication.shared.applicationState == .active else { return }
         _animator?.stopAnimation(true)
         _animator?.finishAnimation(at: .current)
