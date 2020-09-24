@@ -41,14 +41,14 @@ class Animator {
     private var _animator: UIViewPropertyAnimator?
     private var animator: UIViewPropertyAnimator { _animator ?? createAnimator() }
     private func createAnimator() -> UIViewPropertyAnimator {
+        let duration = self.duration
         let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
         
         animator.pausesOnCompletion = true
         animator.pauseAnimation()
-        if let animation = keyframes {
-            animator.addAnimations({ [weak self] in
-                guard let self = self else { return }
-                UIView.animateKeyframes(withDuration: self.duration, delay: 0, animations: animation.execute)
+        if let keyframes = keyframes {
+            animator.addAnimations({
+                UIView.animateKeyframes(withDuration: duration, delay: 0, animations: keyframes.execute)
             })
         }
         animator.fractionComplete = progress
