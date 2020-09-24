@@ -37,6 +37,7 @@ class Animator {
     private let duration: Double
     private(set) var progress: CGFloat = 0
     private(set) var isRunning = false
+    private(set) var backgroundTransitionTime: CFTimeInterval?
     
     private var _animator: UIViewPropertyAnimator?
     private var animator: UIViewPropertyAnimator { _animator ?? createAnimator() }
@@ -58,18 +59,26 @@ class Animator {
     
     init(duration: Double) {
         self.duration = duration
-        [UIApplication.didBecomeActiveNotification, UIApplication.willResignActiveNotification].forEach({
+        [UIApplication.willEnterForegroundNotification, UIApplication.willResignActiveNotification].forEach({
             NotificationCenter.default.addObserver(self, selector: #selector(receivedAppLifecycleNotification), name: $0, object: nil)
         })
     }
     
     @objc private func receivedAppLifecycleNotification(_ notification: Notification) {
         switch notification.name {
-        case UIApplication.didBecomeActiveNotification:
-            // FIXME: Advance progress according to passed time since going to background
-            if isRunning { _animator?.startAnimation() }
+        case UIApplication.willEnterForegroundNotification:
+            guard isRunning else { return }
+            if let backgroundTransitionTime = backgroundTransitionTime {
+                self.backgroundTransitionTime = nil
+                let backgroundProgress = (CACurrentMediaTime() - backgroundTransitionTime) / duration
+                seekTo(progress: progress + CGFloat(backgroundProgress))
+            }
+            _animator?.startAnimation()
         case UIApplication.willResignActiveNotification:
+            guard isRunning else { return }
             _animator?.pauseAnimation()
+            progress = _animator?.fractionComplete ?? 0
+            backgroundTransitionTime = CACurrentMediaTime()
         default: return
         }
     }
