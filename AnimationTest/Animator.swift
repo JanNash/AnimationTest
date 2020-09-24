@@ -45,7 +45,6 @@ class Animator {
         let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
         
         animator.pausesOnCompletion = true
-        animator.pauseAnimation()
         if let keyframes = keyframes {
             animator.addAnimations({
                 UIView.animateKeyframes(withDuration: duration, delay: 0, animations: keyframes.execute)
