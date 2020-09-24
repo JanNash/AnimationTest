@@ -7,6 +7,100 @@
 
 import UIKit
 
+
+class Animation {
+    let id = UUID()
+    private let animation: () -> Void
+    
+    init<T: UIView>(for view: T, animation: @escaping (T) -> Void) {
+        self.animation = { [weak view] in
+            guard let view = view else { return }
+            animation(view)
+        }
+    }
+    
+    func execute() { animation() }
+}
+
+
+class Animator {
+    enum Configuration {
+        case timingParameters(UITimingCurveProvider)
+        case curve(UIView.AnimationCurve)
+        case controlPoints(p1: CGPoint, p2: CGPoint)
+        case dampingRatio(CGFloat)
+    }
+    
+    var duration: Double = 10
+    var configuration: Configuration = .curve(.linear)
+    var animation: Animation?
+    
+    private(set) var progress: CGFloat = 0
+    
+    private var _animator: UIViewPropertyAnimator?
+    private var animator: UIViewPropertyAnimator {
+        _animator ?? {
+            switch configuration {
+            case .timingParameters(let parameters):
+                _animator = .init(duration: duration, timingParameters: parameters)
+            case .curve(let curve):
+                _animator = .init(duration: duration, curve: curve)
+            case .controlPoints(let controlPoint1, let controlPoint2):
+                _animator = .init(duration: duration, controlPoint1: controlPoint1, controlPoint2: controlPoint2)
+            case .dampingRatio(let dampingRatio):
+                _animator = .init(duration: duration, dampingRatio: dampingRatio)
+            }
+            
+            _animator?.pausesOnCompletion = true
+            _animator?.pauseAnimation()
+            if let animation = animation {
+                _animator?.addAnimations(animation.execute)
+            }
+            _animator?.fractionComplete = progress
+            
+            return _animator!
+        }()
+    }
+
+    enum StopType {
+        case withoutFinishing
+        case finish(position: UIViewAnimatingPosition)
+    }
+    
+    func stop(_ type: StopType) {
+        _animator?.stopAnimation(true)
+        if case .finish(let position) = type {
+            _animator?.finishAnimation(at: position)
+        }
+        progress = 0
+    }
+    
+    func pause() {
+        _animator?.pauseAnimation()
+    }
+    
+    func seekTo(progress: CGFloat) {
+        self.progress = progress
+        guard let animator = _animator else { return }
+        let isRunning = animator.isRunning
+        animator.fractionComplete = progress
+        if !isRunning {
+            animator.pauseAnimation()
+        }
+    }
+    
+    func play(fromProgress progress: CGFloat? = nil) {
+        guard animation != nil else { return }
+        let progress = progress ?? self.progress
+        if progress != animator.fractionComplete { seekTo(progress: progress) }
+        animator.startAnimation()
+        // This didn't work:
+//        animator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
+    }
+}
+
+
+
 class ViewController: UIViewController {
     private var progressBarContainer = ProgressBarContainer()
     private lazy var startButton: UIButton = {
@@ -53,76 +147,31 @@ class ProgressBarContainer: UIView {
     }
     
     private var progressBar = ProgressBar()
-    private let duration: TimeInterval = 30
     
     override func layoutSubviews() {
         super.layoutSubviews()
         progressBar.frame = bounds.inset(by: UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5))
         progressBar.layoutIfNeeded()
-        createAnimator()
     }
     
-    private var animator: UIViewPropertyAnimator? {
-        willSet {
-            guard animator?.state != .inactive else { return }
-            animator?.stopAnimation(true)
-            animator?.finishAnimation(at: .current)
-        }
-    }
-    
-    private var currentTime: TimeInterval {
-        get {
-            guard let animator = animator, duration > 0 else { return 0 }
-            return Double(animator.fractionComplete) * duration
-        }
-        set {
-            guard let animator = animator, duration > 0 else { return }
-            animator.fractionComplete = CGFloat(newValue / duration)
-        }
-    }
-    
-    private func createAnimator() {
-        print("creating new animator")
-        // Save State
-        let time = currentTime
-        let isRunning = animator?.isRunning ?? false
-        
-        if let animator = self.animator,
-           animator.state != .stopped {
-            self.animator?.stopAnimation(true)
-            self.animator?.finishAnimation(at: .current)
-        }
-        self.animator = nil
-        
-        let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
-        animator.pausesOnCompletion = true
-        animator.pauseAnimation()
-        
-        progressBar.setProgress(0)
-        
-        animator.addAnimations { [weak self] in
-            guard let self = self else { return }
-            UIView.animateKeyframes(withDuration: self.duration, delay: 0, animations: { [weak self] in
-                guard let self = self, self.duration > 0 else { return }
-                
+    private lazy var animator: Animator = {
+        let animator = Animator()
+        animator.duration = 30
+        animator.configuration = .curve(.linear)
+        animator.seekTo(progress: 0.5)
+        animator.animation = Animation(for: self) { view in
+            view.progressBar.setProgress(0)
+            UIView.animateKeyframes(withDuration: 30, delay: 0, animations: {
                 UIView.addKeyframe(withRelativeStartTime: 0, relativeDuration: 1) {
-                    self.progressBar.setProgress(1)
+                    view.progressBar.setProgress(1)
                 }
             })
         }
-        
-        self.animator = animator
-        
-        // Restore State
-        currentTime = time
-        if isRunning {
-            animator.continueAnimation(withTimingParameters: nil, durationFactor: 0)
-        }
-    }
+        return animator
+    }()
     
     @objc func startAnimator() {
-        currentTime = 0
-        animator?.continueAnimation(withTimingParameters: nil, durationFactor: 0)
+        animator.play()
     }
 }
 
@@ -132,15 +181,17 @@ extension ProgressBarContainer {
         super.didMoveToWindow()
         if window == nil {
             // disappeared
+//            animator.pause()
         } else {
             // appeared
-            createAnimator()
+//            animator.play()
+//            createAnimator()
         }
     }
     
     @objc private func applicationWillEnterForeground() {
         print("applicationWillEnterForeground")
-        createAnimator()
+//        createAnimator()
     }
 }
 
@@ -151,7 +202,7 @@ class ProgressBar: UIView {
         upcomingView.frame.size.width = frame.width * progress
     }
     
-    private var progress: CGFloat = 0.4
+    private var progress: CGFloat = 0
     
     var progressColor = UIColor.red { didSet { upcomingView.backgroundColor = progressColor } }
     
