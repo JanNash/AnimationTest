@@ -53,6 +53,13 @@ class Animator<T: UIView> {
         })
     }
     
+    // Destructor
+    deinit {
+        _animator?.stopAnimation(true)
+        _animator?.finishAnimation(at: .current)
+        _animator = nil
+    }
+    
     // Functions
     func play() {
         guard keyframes != nil else { return }
