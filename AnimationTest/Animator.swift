@@ -25,12 +25,17 @@ class Animator<T: UIView> {
             let duration = self.duration
             let animator = UIViewPropertyAnimator(duration: duration, curve: .linear)
             animator.pausesOnCompletion = true
-            animator.fractionComplete = progress
             
             if let keyframes = keyframes {
                 animator.addAnimations({
                     UIView.animateKeyframes(withDuration: duration, delay: 0, animations: keyframes.evaluate)
                 })
+            }
+            
+            if progress != 0 {
+                animator.startAnimation()
+                animator.pauseAnimation()
+                animator.fractionComplete = progress
             }
             
             _animator = animator
@@ -89,14 +94,12 @@ class Animator<T: UIView> {
     func updateForLayoutChange() {
         guard let currentAnimator = _animator, UIApplication.shared.applicationState == .active else { return }
         let isRunning = currentAnimator.isRunning
+        progress = currentAnimator.fractionComplete
         currentAnimator.stopAnimation(true)
         currentAnimator.finishAnimation(at: .current)
         _animator = nil
-        keyframes?.layoutViewIfNeeded()
-        animator.fractionComplete = progress
-        if isRunning {
-            animator.startAnimation()
-        }
+//        keyframes?.layoutViewIfNeeded()
+        isRunning ? animator.startAnimation() : animator.pauseAnimation()
     }
     
     // Private Functions
