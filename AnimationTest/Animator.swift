@@ -8,13 +8,6 @@
 import UIKit
 
 
-// TODO:
-/*
- - tabview to check what happens when view disappears and reappears
- - test view layout changes while animator is running
- */
-
-
 class Animator<T: UIView> {
     // Keyframes
     var keyframes: Keyframes<T>?
@@ -36,7 +29,7 @@ class Animator<T: UIView> {
             
             if let keyframes = keyframes {
                 animator.addAnimations({
-                    UIView.animateKeyframes(withDuration: duration, delay: 0) { keyframes.evaluate() }
+                    UIView.animateKeyframes(withDuration: duration, delay: 0, animations: keyframes.evaluate)
                 })
             }
             
